@@ -395,7 +395,7 @@ const ProfilePage = () => {
             if (targetRole === 'admin') {
               navigate('/admin');
             } else {
-              navigate('/dashboard');
+              navigate('/login-redirect');
             }
           }, 1000);
         }

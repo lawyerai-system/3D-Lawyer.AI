@@ -106,7 +106,7 @@ const PrivacyPage = () => {
 
   const handleHomeRedirect = () => {
     if (user) {
-      navigate('/dashboard');
+      navigate('/login-redirect');
     } else {
       navigate('/');
     }

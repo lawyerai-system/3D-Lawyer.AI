@@ -167,7 +167,7 @@ const HelpCenterPage = () => {
 
   const handleHomeRedirect = () => {
     if (user) {
-      navigate('/dashboard');
+      navigate('/login-redirect');
     } else {
       navigate('/');
     }
