@@ -1,0 +1,421 @@
+import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
+import { Link, useNavigate } from 'react-router-dom';
+import api from '../../../utils/axios';
+import { FaPen, FaMagnifyingGlass, FaUser, FaClock, FaComment, FaChevronLeft, FaChevronRight } from 'react-icons/fa6';
+import { useAuth } from '../../../context/AuthContext';
+import { useSettings } from '../../../context/SettingsContext';
+
+// ... (styled components skipped, will retain unchanged if I target the top block correctly)
+
+// I will target the imports only
+
+
+const PaginationContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 3rem;
+`;
+
+const PageBtn = styled.button`
+  background: ${props => props.active ? 'var(--primary)' : 'rgba(255,255,255,0.05)'};
+  color: ${props => props.active ? 'white' : 'var(--text-secondary)'};
+  border: 1px solid ${props => props.active ? 'var(--primary)' : 'rgba(255,255,255,0.1)'};
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    background: ${props => props.active ? 'var(--primary)' : 'rgba(255,255,255,0.1)'};
+    color: white;
+    border-color: rgba(255,255,255,0.3);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const BlogContainer = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+`;
+
+const BlogHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+`;
+
+const Title = styled.h1`
+  font-size: 2.5rem;
+  background: linear-gradient(to right, #ffffff 0%, #a0e6ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 20px rgba(160, 230, 255, 0.3);
+  margin: 0;
+`;
+
+const Controls = styled.div`
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    width: 100%;
+  }
+`;
+
+const SearchBox = styled.div`
+  position: relative;
+  
+  input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50px; // Pill shape
+    padding: 0.8rem 1.2rem 0.8rem 2.5rem;
+    color: white;
+    width: 250px;
+    font-size: 0.95rem;
+
+    &:focus {
+      border-color: var(--primary);
+      outline: none;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+
+  svg {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+  }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+`;
+
+const CreateBtn = styled(Link)`
+  background: var(--primary);
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+  justify-content: center; /* Center text on mobile */
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(25, 195, 125, 0.3);
+  }
+`;
+
+const FilterSelect = styled.select`
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
+  padding: 0.8rem 1.2rem;
+  color: white;
+  font-size: 0.95rem;
+  min-width: 150px;
+  cursor: pointer;
+  appearance: none; // Remove default arrow for custom look if needed, but keeping simple for now
+  
+  &:focus {
+    border-color: var(--primary);
+    outline: none;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  option {
+    background: #1a1d2d; // Solid dark background for options
+    color: white;
+    padding: 10px;
+  }
+`;
+
+const BlogGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr; /* Single column on mobile */
+    gap: 1.5rem;
+  }
+`;
+
+const BlogCard = styled(Link)`
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    
+    h3 { color: var(--primary); }
+  }
+`;
+
+// Placeholder for image - can be dynamic later
+const CardImage = styled.div`
+  height: 200px;
+  background: linear-gradient(45deg, #1a1d2d, #2a2d3d);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.1);
+  font-size: 3rem;
+`;
+
+const CardContent = styled.div`
+  padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+`;
+
+const CardTitle = styled.h3`
+  font-size: 1.4rem;
+  margin-bottom: 0.8rem;
+  line-height: 1.4;
+  color: var(--text-main);
+  transition: color 0.2s;
+`;
+
+const CardExcerpt = styled.p`
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  flex: 1;
+`;
+
+const CardMeta = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.5);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 1rem;
+
+  div {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+`;
+
+const Tag = styled.span`
+  background: rgba(25, 195, 125, 0.1);
+  color: var(--primary);
+  padding: 0.2rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  display: inline-block;
+  align-self: flex-start;
+`;
+
+const BlogPage = () => {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('');
+  const [selectedTag, setSelectedTag] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { settings } = useSettings();
+
+  // Fetch Posts
+  useEffect(() => {
+    const fetchPosts = async () => {
+      setLoading(true);
+      try {
+        const queryParams = {
+          page,
+          limit: 6,
+          search
+        };
+
+        if (category) queryParams.category = category;
+        if (selectedTag) queryParams.tags = selectedTag;
+
+        const query = new URLSearchParams(queryParams).toString();
+
+        const res = await api.get(`/api/blogs?${query}`);
+        if (res.data.status === 'success') {
+          setPosts(res.data.data);
+          setTotalPages(res.data.totalPages);
+        }
+      } catch (error) {
+        console.error("Failed to fetch blogs", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Debounce search
+    const timeoutId = setTimeout(() => {
+      fetchPosts();
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [page, search, category, selectedTag]);
+
+  const handleSearch = (e) => {
+    setSearch(e.target.value);
+    setPage(1); // Reset to first page on search
+  };
+
+  return (
+    <BlogContainer>
+      <BlogHeader>
+        <Title>Legal Insights</Title>
+        <Controls>
+          <FilterSelect value={category} onChange={(e) => { setCategory(e.target.value); setPage(1); }}>
+            <option value="">All Categories</option>
+            {settings?.categories?.blog?.map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </FilterSelect>
+
+          <FilterSelect value={selectedTag} onChange={(e) => { setSelectedTag(e.target.value); setPage(1); }}>
+            <option value="">All Tags</option>
+            <option value="Criminal Law">Criminal Law</option>
+            <option value="Constitutional Law">Constitutional Law</option>
+            <option value="Civil Law">Civil Law</option>
+            <option value="Case Studies">Case Studies</option>
+          </FilterSelect>
+
+          <SearchBox>
+            <FaMagnifyingGlass />
+            <input
+              type="text"
+              placeholder="Search articles..."
+              value={search}
+              onChange={handleSearch}
+            />
+          </SearchBox>
+
+          {user?.role === 'lawyer' && (
+            <CreateBtn to="/dashboard/blog/create">
+              <FaPen size={14} /> Write Article
+            </CreateBtn>
+          )}
+        </Controls>
+      </BlogHeader>
+
+      {loading ? (
+        <div style={{ textAlign: 'center', color: 'gray', marginTop: '2rem' }}>Loading articles...</div>
+      ) : posts.length === 0 ? (
+        <div style={{ textAlign: 'center', color: 'gray', marginTop: '4rem' }}>
+          <h2>No articles found</h2>
+          <p>Try adjusting your search or write a new one!</p>
+        </div>
+      ) : (
+        <>
+          <BlogGrid>
+            {posts.map(post => (
+              <BlogCard key={post._id} to={`/dashboard/blog/${post._id}`}>
+                {post.image && !post.image.includes('default-blog.jpg') ? (
+                  <img
+                    src={post.image.startsWith('http') ? post.image : post.image}
+                    alt={post.title}
+                    style={{ height: '200px', width: '100%', objectFit: 'cover' }}
+                  />
+                ) : (
+                  <CardImage>
+                    ⚖️
+                  </CardImage>
+                )}
+                <CardContent>
+                  <Tag>{post.category || 'General'}</Tag>
+                  <CardTitle>{post.title}</CardTitle>
+                  <CardExcerpt>
+                    {post.summary || (post.content.substring(0, 120) + '...')}
+                  </CardExcerpt>
+                  <CardMeta>
+                    <div><FaUser /> {post.author?.name || 'Unknown'}</div>
+                    <div><FaClock /> {new Date(post.createdAt).toLocaleDateString()}</div>
+                  </CardMeta>
+                </CardContent>
+              </BlogCard>
+            ))}
+          </BlogGrid>
+
+          {totalPages > 1 && (
+            <PaginationContainer>
+              <PageBtn
+                disabled={page === 1}
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+              >
+                <FaChevronLeft />
+              </PageBtn>
+
+              {[...Array(totalPages)].map((_, i) => (
+                <PageBtn
+                  key={i + 1}
+                  active={page === i + 1}
+                  onClick={() => setPage(i + 1)}
+                >
+                  {i + 1}
+                </PageBtn>
+              ))}
+
+              <PageBtn
+                disabled={page === totalPages}
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              >
+                <FaChevronRight />
+              </PageBtn>
+            </PaginationContainer>
+          )}
+        </>
+      )}
+    </BlogContainer>
+  );
+};
+
+export default BlogPage;
