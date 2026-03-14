@@ -9,6 +9,7 @@ import {
     FaUserSlash, FaUserCheck, FaTrash, FaEllipsisV, FaChevronLeft, 
     FaChevronRight, FaInfoCircle, FaShieldAlt 
 } from 'react-icons/fa';
+import UserAvatar from '../../components/Common/UserAvatar';
 
 const Container = styled.div`
   display: flex;
@@ -452,11 +453,12 @@ const UserManagement = () => {
                                     <tr key={u._id}>
                                         <Td>
                                             <UserInfo>
-                                                <div className="avatar" style={{ background: u.isActive ? 'var(--primary)' : '#4b5563' }}>
-                                                    {u.profileImage && u.profileImage !== 'default.jpg' ? 
-                                                        <img src={u.profileImage.startsWith('http') ? u.profileImage : `http://localhost:5000${u.profileImage}`} alt="" /> 
-                                                        : u.name?.[0].toUpperCase()}
-                                                </div>
+                                                <UserAvatar 
+                                                    src={u.profileImage} 
+                                                    name={u.name} 
+                                                    size="40px" 
+                                                    className="avatar"
+                                                />
                                                 <div className="details">
                                                     <span className="name">{u.name}</span>
                                                     <span className="email">{u.email}</span>
@@ -549,11 +551,12 @@ const UserManagement = () => {
                     <ModalContent onClick={e => e.stopPropagation()}>
                         <ModalHeader>
                             <ProfileSection>
-                                <div className="avatar">
-                                    {selectedUser.profileImage && selectedUser.profileImage !== 'default.jpg' ? 
-                                        <img src={selectedUser.profileImage.startsWith('http') ? selectedUser.profileImage : `http://localhost:5000${selectedUser.profileImage}`} alt="" /> 
-                                        : <FaUser />}
-                                </div>
+                                <UserAvatar 
+                                    src={selectedUser.profileImage} 
+                                    name={selectedUser.name} 
+                                    size="90px" 
+                                    className="avatar"
+                                />
                                 <h3>{selectedUser.name}</h3>
                                 <span>{selectedUser.email}</span>
                             </ProfileSection>

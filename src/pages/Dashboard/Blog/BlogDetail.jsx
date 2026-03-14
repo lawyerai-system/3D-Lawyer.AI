@@ -5,6 +5,7 @@ import api from '../../../utils/axios';
 import { FaArrowLeft, FaUser, FaCalendar, FaTag, FaTrash, FaPen, FaFlag } from 'react-icons/fa6';
 import { useAuth } from '../../../context/AuthContext';
 import ReportModal from '../../../components/Common/ReportModal';
+import UserAvatar from '../../../components/Common/UserAvatar';
 
 const PageContainer = styled.div`
   max-width: 900px;
@@ -388,7 +389,10 @@ const BlogDetail = () => {
         <CategoryTag>{post.category}</CategoryTag>
         <Title>{post.title}</Title>
         <MetaInfo>
-          <div><FaUser /> {post.author?.name}</div>
+          <div style={{ gap: '0.8rem' }}>
+            <UserAvatar src={post.author?.profilePicture} name={post.author?.name} size="24px" />
+            {post.author?.name}
+          </div>
           <div><FaCalendar /> {new Date(post.createdAt).toLocaleDateString()}</div>
         </MetaInfo>
 
@@ -483,7 +487,11 @@ const BlogDetail = () => {
         <CommentList>
           {post.comments?.map(cmt => (
             <CommentItem key={cmt._id}>
-              <Avatar>{cmt.user?.name?.[0]}</Avatar>
+              <UserAvatar 
+                src={cmt.user?.profilePicture} 
+                name={cmt.user?.name} 
+                size="40px" 
+              />
               <CommentContent>
                 <div className="header">
                   <strong>{cmt.user?.name}</strong>

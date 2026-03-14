@@ -410,32 +410,32 @@
 //   }
 // };
 
-// exports.updatePassword = async (req, res) => {
-//   try {
-//     // Get user from collection
-//     const user = await User.findById(req.user.id).select('+password');
+exports.updatePassword = async (req, res) => {
+  try {
+    // Get user from collection
+    const user = await User.findById(req.user.id).select('+password');
 
-//     // Check if posted current password is correct
-//     if (!(await user.correctPassword(req.body.currentPassword))) {
-//       return res.status(401).json({
-//         status: 'error',
-//         message: 'Your current password is wrong'
-//       });
-//     }
+    // Check if posted current password is correct
+    if (!(await user.correctPassword(req.body.currentPassword))) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Your current password is wrong'
+      });
+    }
 
-//     // Update password
-//     user.password = req.body.newPassword;
-//     await user.save();
+    // Update password
+    user.password = req.body.newPassword;
+    await user.save();
 
-//     // Log user in, send JWT
-//     createSendToken(user, 200, res);
-//   } catch (err) {
-//     res.status(400).json({
-//       status: 'error',
-//       message: err.message
-//     });
-//   }
-// };
+    // Log user in, send JWT
+    createSendToken(user, 200, res);
+  } catch (err) {
+    res.status(400).json({
+      status: 'error',
+      message: err.message
+    });
+  }
+};
 
 // // Verify email
 // exports.verifyEmail = async (req, res) => {

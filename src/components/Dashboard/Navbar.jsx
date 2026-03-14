@@ -4,6 +4,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { FaBars, FaXmark, FaRightFromBracket, FaUser, FaChevronDown, FaFileLines, FaBrain, FaGavel, FaScaleBalanced, FaMicrochip, FaListCheck } from 'react-icons/fa6';
 import { useSettings } from '../../context/SettingsContext';
+import UserAvatar from '../Common/UserAvatar';
 
 const NavContainer = styled.nav`
   position: sticky;
@@ -448,15 +449,6 @@ const Navbar = () => {
     setIsDropdownOpen(false);
   };
 
-  const getProfileImage = () => {
-    if (!user) return <FaUser />;
-    const image = user.profilePicture || user.profileImage;
-    if (!image || image === 'default.jpg') {
-      return user.name ? user.name.charAt(0).toUpperCase() : <FaUser />;
-    }
-    const fullUrl = image.startsWith('http') ? image : `${image.startsWith('/') ? '' : '/'}${image}`;
-    return <img src={fullUrl} alt="Profile" />;
-  };
 
     const getRolePrefix = () => {
         if (!user) return '/dashboard';
@@ -576,7 +568,11 @@ const Navbar = () => {
               <span className="role">{user?.role?.replace('_', ' ')}</span>
             </UserInfo>
             <ProfileImage>
-              {getProfileImage()}
+              <UserAvatar 
+                src={user.profilePicture || user.profileImage} 
+                name={user.name} 
+                size="34px" 
+              />
             </ProfileImage>
           </ProfileButton>
 
@@ -652,7 +648,13 @@ const Navbar = () => {
 
         <div style={{ marginTop: 'auto', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '2rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-            <ProfileImage style={{ width: '45px', height: '45px' }}>{getProfileImage()}</ProfileImage>
+            <ProfileImage style={{ width: '45px', height: '45px' }}>
+              <UserAvatar 
+                src={user.profilePicture || user.profileImage} 
+                name={user.name} 
+                size="45px" 
+              />
+            </ProfileImage>
             <UserInfo style={{ textAlign: 'left' }}>
               <span className="name" style={{ fontSize: '1rem' }}>{user?.name}</span>
               <span className="role">{user?.role?.replace('_', ' ')}</span>

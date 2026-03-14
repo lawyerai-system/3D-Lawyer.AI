@@ -3,9 +3,12 @@ import styled from 'styled-components';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
-import { FaUser, FaEnvelope, FaPhone, FaLocationDot, FaGlobe, FaBriefcase, FaGraduationCap, FaCamera, FaRightFromBracket, FaTrash, FaXmark } from 'react-icons/fa6';
+import { FaUser, FaEnvelope, FaPhone, FaLocationDot, FaGlobe, FaBriefcase, FaGraduationCap, FaCamera, FaRightFromBracket, FaTrash, FaXmark, FaClock, FaCalendarDays, FaChartSimple, FaClockRotateLeft, FaKey, FaShieldHalved, FaRobot, FaBars } from 'react-icons/fa6';
+import api from '../../utils/axios';
+import { toast } from 'react-hot-toast';
 import Cropper from 'react-easy-crop';
 import { getCroppedImg } from '../../utils/cropUtils';
+import UserAvatar from '../../components/Common/UserAvatar';
 
 const Container = styled.div`
   max-width: 1000px;
@@ -52,14 +55,16 @@ const Avatar = styled.div`
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: var(--bg-dark);
-  border: 4px solid var(--primary);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  border: 4px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 4rem;
-  color: var(--text-secondary);
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: white;
   overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
   
   img {
     width: 100%;
@@ -92,62 +97,105 @@ const EditAvatarBtn = styled.label`
 const HeaderInfo = styled.div`
   flex: 1;
 
-  h1 {
-    margin: 0 0 0.5rem 0;
-    font-size: 2.5rem;
-    color: var(--text-main);
+  .name-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+    
+    h1 {
+      margin: 0;
+      font-size: 2.22rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+  }
+
+  .email-row {
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.2rem;
+    font-size: 1rem;
+    opacity: 0.8;
+  }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      
+      svg { color: var(--primary); }
+      strong { color: var(--text-main); margin-left: auto; }
+    }
+
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr;
+    }
   }
 
   .badges {
     display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
-    
-    @media (max-width: 768px) {
-      justify-content: center;
-    }
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-top: 0.5rem;
   }
 
   .badge {
-    background: rgba(108, 93, 211, 0.15);
+    background: rgba(108, 93, 211, 0.1);
     color: var(--primary);
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    text-transform: capitalize;
-    border: 1px solid rgba(108, 93, 211, 0.3);
+    padding: 0.4rem 1rem;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid rgba(108, 93, 211, 0.2);
   }
 `;
 
 const Actions = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.8rem;
+  min-width: 200px;
   
   @media (max-width: 768px) {
     width: 100%;
-    flex-direction: row;
-    justify-content: center;
+    margin-top: 1rem;
   }
 `;
 
 const ActionBtn = styled.button`
-  background: ${props => props.$danger ? 'rgba(255, 77, 77, 0.1)' : 'var(--bg-dark)'};
-  color: ${props => props.$danger ? '#ff4d4d' : 'var(--text-main)'};
-  border: 1px solid ${props => props.$danger ? 'rgba(255, 77, 77, 0.2)' : 'var(--border)'};
-  padding: 0.8rem 1.5rem;
+  background: ${props => props.$variant === 'primary' ? 'var(--primary)' : props.$variant === 'danger' ? 'rgba(255, 77, 77, 0.1)' : 'rgba(255,255,255,0.03)'};
+  color: ${props => props.$variant === 'primary' ? 'white' : props.$variant === 'danger' ? '#ff4d4d' : 'var(--text-main)'};
+  border: 1px solid ${props => props.$variant === 'primary' ? 'transparent' : props.$variant === 'danger' ? 'rgba(255, 77, 77, 0.2)' : 'rgba(255,255,255,0.05)'};
+  padding: 0.75rem 1.2rem;
   border-radius: 12px;
   cursor: pointer;
   font-weight: 600;
-  transition: all 0.3s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
+  gap: 0.6rem;
+  font-size: 0.9rem;
 
   &:hover {
-    background: ${props => props.$danger ? 'rgba(255, 77, 77, 0.2)' : 'rgba(255, 255, 255, 0.05)'};
+    background: ${props => props.$variant === 'primary' ? 'var(--primary-hover)' : props.$variant === 'danger' ? 'rgba(255, 77, 77, 0.2)' : 'rgba(255, 255, 255, 0.08)'};
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   }
 `;
 
@@ -170,6 +218,19 @@ const FormSection = styled.div`
   }
 `;
 
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
 const ToggleEditBtn = styled.button`
   background: var(--primary);
   color: white;
@@ -185,44 +246,130 @@ const ToggleEditBtn = styled.button`
   }
 `;
 
-const Grid = styled.div`
+const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-top: 2rem;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const StatCard = styled.div`
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  padding: 1.5rem;
+  border-radius: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: var(--primary);
+    transform: translateY(-5px);
+    background: rgba(108, 93, 211, 0.05);
+  }
+
+  .value {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 0.4rem;
+  }
+
+  .label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+`;
+
+const Modal = styled.div`
+  background: var(--bg-panel);
+  padding: 2.5rem;
+  border-radius: 24px;
+  width: 90%;
+  max-width: 450px;
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  position: relative;
+  z-index: 3001;
+
+  h3 {
+    margin: 0 0 1.5rem 0;
+    color: var(--text-main);
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .modal-desc {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+  }
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const InputGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.6rem;
 
   label {
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.6rem;
+    
+    svg { color: var(--primary); font-size: 1rem; }
   }
 
   input, select {
     background: var(--bg-dark);
     border: 1px solid var(--border);
-    padding: 1rem;
-    border-radius: 10px;
-    color: var(--text-main);
-    font-size: 1rem;
-    transition: all 0.2s;
+    padding: 0.9rem 1.1rem;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
 
     &:disabled {
-      opacity: 0.7;
+      opacity: 0.6;
       cursor: not-allowed;
       border-color: transparent;
+      background: rgba(255,255,255,0.02);
     }
 
     &:focus {
       outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 0 2px rgba(108, 93, 211, 0.2);
+      background: rgba(108, 93, 211, 0.05);
+      box-shadow: 0 0 0 3px rgba(108, 93, 211, 0.15);
     }
   }
 `;
@@ -257,9 +404,13 @@ const CropperControls = styled.div`
     gap: 1rem;
 `;
 
+const MainLayout = styled.div`
+  width: 100%;
+`;
+
 const StyledFormSection = styled(FormSection)`
     padding: 1.5rem;
-    overflow: hidden; /* Prevent double scrollbars */
+    overflow: hidden;
 `;
 
 const ControlBtn = styled.button`
@@ -299,12 +450,13 @@ const Notification = styled.div`
 `;
 
 const ProfilePage = () => {
-  const { user, updateProfile, updateUserState, logout, loading } = useAuth();
+  const { user, updateProfile, updateUserState, logout, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  // Add useLocation to check for onboarding state
   const { state } = useLocation();
 
   const [isEditing, setIsEditing] = useState(false);
+  const [stats, setStats] = useState(null);
+  const [loadingStats, setLoadingStats] = useState(true);
 
   // Initial state based on legacy profile fields
   const [formData, setFormData] = useState({
@@ -325,6 +477,29 @@ const ProfilePage = () => {
     studentId: '',
     dob: ''
   });
+
+  // Password Change State
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await api.get('/api/dashboard/stats');
+        setStats(res.data.data);
+      } catch (err) {
+        console.error('Failed to fetch profile stats', err);
+      } finally {
+        setLoadingStats(false);
+      }
+    };
+    fetchStats();
+  }, []);
 
   useEffect(() => {
     // If onboarding, auto-enable editing
@@ -411,6 +586,38 @@ const ProfilePage = () => {
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  const handlePasswordUpdate = async (e) => {
+    e.preventDefault();
+    
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      showNotification("New passwords do not match!", "error");
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      showNotification("Password must be at least 6 characters.", "error");
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      const res = await api.put('/api/auth/change-password', {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      });
+
+      if (res.data.status === 'success') {
+        showNotification("Password updated successfully!", "success");
+        setShowPasswordModal(false);
+        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      }
+    } catch (err) {
+      showNotification(err.response?.data?.message || "Failed to update password.", "error");
+    } finally {
+      setPasswordLoading(false);
+    }
   };
 
 
@@ -517,10 +724,10 @@ const ProfilePage = () => {
   };
 
 
-  if (loading) {
+  if (authLoading || (loadingStats && !user)) {
     return (
       <Container style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'white' }}>
-        <div style={{ fontSize: '1.2rem' }}>Loading Profile...</div>
+        <FaRobot size={40} className="fa-spin" style={{ color: 'var(--primary)' }} />
       </Container>
     );
   }
@@ -573,19 +780,11 @@ const ProfilePage = () => {
       <ProfileHeader>
         <AvatarWrapper>
           <Avatar>
-            {/* Handle inconsistent naming: profilePicture (Mongo) vs profileImage (Legacy/Local) */}
-            {(formData.profilePicture || formData.profileImage) ? (
-              <img
-                src={
-                  (formData.profilePicture || formData.profileImage).startsWith('http')
-                    ? (formData.profilePicture || formData.profileImage)
-                    : `${(formData.profilePicture || formData.profileImage).startsWith('/') ? '' : '/'}${formData.profilePicture || formData.profileImage}`
-                }
-                alt="Profile"
-              />
-            ) : (
-              (formData.name && formData.name.trim() !== '') ? formData.name.charAt(0).toUpperCase() : <FaUser />
-            )}
+            <UserAvatar 
+              src={formData.profilePicture || formData.profileImage} 
+              name={formData.name || user?.name} 
+              size="160px" 
+            />
           </Avatar>
 
           {/* Delete Button - Only show if image exists */}
@@ -623,36 +822,123 @@ const ProfilePage = () => {
         </AvatarWrapper>
 
         <HeaderInfo>
-          <h1>{formData.name || 'User Name'}</h1>
-          <div style={{ color: 'var(--text-secondary)' }}>{formData.email}</div>
+          <div className="name-row">
+            <h1>{formData.name || 'User'}</h1>
+            <div className="badges">
+              <span className="badge">{user?.role?.replace('_', ' ')}</span>
+              {formData.specialization && <span className="badge">{formData.specialization}</span>}
+            </div>
+          </div>
+          
+          <div className="email-row">
+            <FaEnvelope size={14} /> {formData.email}
+          </div>
 
-          <div className="badges">
-            <span className="badge">{formData.profession || user?.role || 'Member'}</span>
-            {formData.specialization && <span className="badge">{formData.specialization}</span>}
+          <div className="meta-grid">
+            <div className="meta-item">
+              <FaCalendarDays /> 
+              Member Since 
+              <strong>{user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'March 2024'}</strong>
+            </div>
+            <div className="meta-item">
+              <FaClock /> 
+              Last Activity 
+              <strong>{stats?.user?.lastLogin ? new Date(stats.user.lastLogin).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just Now'}</strong>
+            </div>
           </div>
         </HeaderInfo>
 
         <Actions>
-          {isEditing && (
-            <ActionBtn $danger onClick={() => {
-              navigate('/dashboard/contact');
-              showNotification("Please contact support to delete your account.", "error");
-            }}>
-              <FaTrash /> Delete Account
-            </ActionBtn>
+          {!isEditing ? (
+            <>
+              <ActionBtn $variant="primary" onClick={() => setIsEditing(true)}>
+                <FaUser /> Edit Profile
+              </ActionBtn>
+              <ActionBtn onClick={() => setShowPasswordModal(true)}>
+                <FaKey /> Change Password
+              </ActionBtn>
+              <ActionBtn $variant="danger" onClick={handleLogout}>
+                <FaRightFromBracket /> Sign Out
+              </ActionBtn>
+            </>
+          ) : (
+             <ActionBtn $variant="primary" onClick={() => document.getElementById('profile-form').requestSubmit()}>
+               Save Profile
+             </ActionBtn>
           )}
         </Actions>
       </ProfileHeader>
 
-      <StyledFormSection>
-        <h3>
-          Personal Information
-          <ToggleEditBtn onClick={() => isEditing ? document.getElementById('profile-form').requestSubmit() : setIsEditing(true)}>
-            {isEditing ? 'Save Changes' : 'Edit Profile'}
-          </ToggleEditBtn>
+      <div style={{ marginBottom: '3rem' }}>
+        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+          <FaChartSimple color="var(--primary)" /> Activity Statistics
         </h3>
+        <StatsGrid>
+            {user?.role === 'lawyer' ? (
+                <>
+                    <StatCard>
+                        <span className="value">{stats?.roleStats?.blogCount || 0}</span>
+                        <span className="label">Blogs Written</span>
+                    </StatCard>
+                    <StatCard>
+                        <span className="value">{stats?.roleStats?.blogViews || 0}</span>
+                        <span className="label">Total Views</span>
+                    </StatCard>
+                    <StatCard>
+                        <span className="value">{stats?.roleStats?.strategyUsage || 0}</span>
+                        <span className="label">Strategies</span>
+                    </StatCard>
+                    <StatCard>
+                        <span className="value">AI</span>
+                        <span className="label">Court Ready</span>
+                    </StatCard>
+                </>
+            ) : user?.role === 'law_student' ? (
+                <>
+                    <StatCard>
+                        <span className="value">{stats?.roleStats?.completedMoots || 0}</span>
+                        <span className="label">Moot Trials</span>
+                    </StatCard>
+                    <StatCard>
+                        <span className="value">{stats?.roleStats?.averageMootScore || 0}/10</span>
+                        <span className="label">Avg Score</span>
+                    </StatCard>
+                    <StatCard>
+                        <span className="value">{stats?.roleStats?.strategyUsage || 0}</span>
+                        <span className="label">Strategies</span>
+                    </StatCard>
+                    <StatCard>
+                        <span className="value">95%</span>
+                        <span className="label">Readiness</span>
+                    </StatCard>
+                </>
+            ) : (
+                <>
+                    <StatCard>
+                        <span className="value">{stats?.roleStats?.aiHelpUsage || 0}</span>
+                        <span className="label">AI Queries</span>
+                    </StatCard>
+                    <StatCard>
+                        <span className="value">{stats?.roleStats?.docAnalyticCount || 0}</span>
+                        <span className="label">Doc Analyses</span>
+                    </StatCard>
+                    <StatCard>
+                        <span className="value">SEC</span>
+                        <span className="label">Data Safety</span>
+                    </StatCard>
+                    <StatCard>
+                        <span className="value">100%</span>
+                        <span className="label">Privacy</span>
+                    </StatCard>
+                </>
+            )}
+        </StatsGrid>
+      </div>
 
-        <form id="profile-form" onSubmit={handleSubmit}>
+      <MainLayout>
+        <StyledFormSection style={{ marginTop: 0 }}>
+          <h3><FaShieldHalved /> Personal Profile</h3>
+          <form id="profile-form" onSubmit={handleSubmit}>
           {/* Main profile grid - adjusted gap for better spacing */}
           <Grid style={{ gap: '1.5rem' }}>
             <InputGroup>
@@ -746,8 +1032,66 @@ const ProfilePage = () => {
           )}
         </form>
       </StyledFormSection>
+
+      </MainLayout>
+
+      {/* Password Change Modal */}
+      {showPasswordModal && (
+        <ModalOverlay onClick={() => setShowPasswordModal(false)}>
+          <Modal onClick={(e) => e.stopPropagation()}>
+            <h3>Change Password</h3>
+            <p className="modal-desc">Ensure your account remains secure by using a strong password.</p>
+            
+            <form onSubmit={handlePasswordUpdate}>
+              <Grid style={{ gridTemplateColumns: '1fr', gap: '1.2rem' }}>
+                <InputGroup>
+                  <label><FaKey /> Current Password</label>
+                  <input 
+                    type="password" 
+                    required
+                    value={passwordData.currentPassword}
+                    onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                    placeholder="Enter current password"
+                  />
+                </InputGroup>
+
+                <InputGroup>
+                  <label><FaKey /> New Password</label>
+                  <input 
+                    type="password" 
+                    required
+                    value={passwordData.newPassword}
+                    onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                    placeholder="Minimum 6 characters"
+                  />
+                </InputGroup>
+
+                <InputGroup>
+                  <label><FaKey /> Confirm New Password</label>
+                  <input 
+                    type="password" 
+                    required
+                    value={passwordData.confirmPassword}
+                    onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                    placeholder="Repeat new password"
+                  />
+                </InputGroup>
+              </Grid>
+
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '2.5rem' }}>
+                <ControlBtn type="button" style={{ flex: 1 }} onClick={() => setShowPasswordModal(false)}>
+                  Cancel
+                </ControlBtn>
+                <ControlBtn type="submit" $primary style={{ flex: 1 }} disabled={passwordLoading}>
+                  {passwordLoading ? <FaRobot className="fa-spin" /> : 'Update Password'}
+                </ControlBtn>
+              </div>
+            </form>
+          </Modal>
+        </ModalOverlay>
+      )}
     </Container>
-  );
+);
 };
 
 export default ProfilePage;

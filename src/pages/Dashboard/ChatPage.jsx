@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled, { keyframes } from 'styled-components';
 import ReactMarkdown from 'react-markdown';
+import UserAvatar from '../../components/Common/UserAvatar';
 import api from '../../utils/axios';
 import { FaPaperPlane, FaTrash, FaRobot, FaUser, FaBars, FaXmark, FaPlus, FaLightbulb, FaGavel, FaFileContract, FaScaleUnbalanced } from 'react-icons/fa6';
 import { useAuth } from '../../context/AuthContext';
@@ -766,7 +767,13 @@ const ChatPage = () => {
             <MessageRow key={i} $isBot={msg.role === 'bot'}>
               <MessageContent>
                 <Avatar $isBot={msg.role === 'bot'}>
-                  {msg.role === 'bot' ? <FaRobot size={16} /> : (user?.name?.[0] || <FaUser size={14} />)}
+                  {msg.role === 'bot' ? <FaRobot size={16} /> : (
+                    <UserAvatar 
+                      src={user?.profilePicture || user?.profileImage} 
+                      name={user?.name} 
+                      size="30px" 
+                    />
+                  )}
                 </Avatar>
                 <TextBlock>
                   {msg.role === 'bot' ? (

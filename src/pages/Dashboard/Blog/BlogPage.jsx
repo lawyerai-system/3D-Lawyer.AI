@@ -5,6 +5,7 @@ import api from '../../../utils/axios';
 import { FaPen, FaMagnifyingGlass, FaUser, FaClock, FaComment, FaChevronLeft, FaChevronRight } from 'react-icons/fa6';
 import { useAuth } from '../../../context/AuthContext';
 import { useSettings } from '../../../context/SettingsContext';
+import UserAvatar from '../../../components/Common/UserAvatar';
 
 // ... (styled components skipped, will retain unchanged if I target the top block correctly)
 
@@ -377,7 +378,10 @@ const BlogPage = () => {
                     {post.summary || (post.content.substring(0, 120) + '...')}
                   </CardExcerpt>
                   <CardMeta>
-                    <div><FaUser /> {post.author?.name || 'Unknown'}</div>
+                    <div style={{ gap: '0.6rem' }}>
+                      <UserAvatar src={post.author?.profilePicture} name={post.author?.name} size="20px" />
+                      {post.author?.name || 'Unknown'}
+                    </div>
                     <div><FaClock /> {new Date(post.createdAt).toLocaleDateString()}</div>
                   </CardMeta>
                 </CardContent>

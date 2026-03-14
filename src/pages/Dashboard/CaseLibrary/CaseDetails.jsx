@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FaStar, FaComment, FaCalendar, FaBuilding, FaGavel, FaLightbulb, FaUser, FaQuoteLeft, FaPaperPlane, FaArrowLeft, FaTags, FaCircleInfo, FaArrowRight, FaBrain, FaScaleBalanced } from 'react-icons/fa6';
 import api from '../../../utils/axios';
 import { useAuth } from '../../../context/AuthContext';
+import UserAvatar from '../../../components/Common/UserAvatar';
 
 const fadeIn = keyframes`
   from { opacity: 0; transform: translateY(20px); }
@@ -353,7 +354,11 @@ const CaseDetails = () => {
               {caseData.comments.map((c, i) => (
                 <CommentCard key={i}>
                   <div className="avatar">
-                    {c.user.profilePicture ? <img src={c.user.profilePicture} alt={c.user.name} /> : c.user.name.charAt(0)}
+                    <UserAvatar 
+                      src={c.user.profilePicture} 
+                      name={c.user.name} 
+                      size="45px" 
+                    />
                   </div>
                   <div className="content-wrap">
                     <div className="header">
