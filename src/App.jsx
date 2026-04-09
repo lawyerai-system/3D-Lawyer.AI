@@ -32,6 +32,7 @@ import CaseDetails from './pages/Dashboard/CaseLibrary/CaseDetails';
 import CasePredictor from './pages/Dashboard/Predictor/CasePredictor';
 import CourtSimulation from './pages/Dashboard/Simulation/CourtSimulation';
 import AICaseBuilder from './pages/Dashboard/Builder/AICaseBuilder';
+import { ResearchHub, PracticeHub, AcademyHub, CommunityHub } from './pages/Dashboard/Hubs/Hubs';
 import AdminLayout from './components/Admin/AdminLayout';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import UserManagement from './pages/Admin/UserManagement';
@@ -49,6 +50,7 @@ import ProtectedAdminRoute from './components/Auth/ProtectedAdminRoute';
 import { SocketProvider } from './context/SocketContext';
 import { ChatProvider } from './context/ChatContext';
 import { SettingsProvider } from './context/SettingsContext';
+import { AuthProvider } from './context/AuthContext';
 import './index.css';
 import RoleProtectedRoute from './components/Auth/RoleProtectedRoute';
 import RoleRedirect from './components/Auth/RoleRedirect';
@@ -59,6 +61,7 @@ import LandingPage from './pages/Landing/LandingPage';
 
 function App() {
   return (
+    <AuthProvider>
     <Router>
       <Toaster position="top-right" toastOptions={{ duration: 4000, style: { background: '#333', color: '#fff' } }} />
       <SettingsProvider>
@@ -110,6 +113,10 @@ function App() {
           <Route path="outcome-predictor" element={<CasePredictor />} />
           <Route path="judicial-simulation" element={<CourtSimulation />} />
           <Route path="case-builder" element={<AICaseBuilder />} />
+          <Route path="research" element={<ResearchHub />} />
+          <Route path="practice" element={<PracticeHub />} />
+          <Route path="academy" element={<AcademyHub />} />
+          <Route path="community" element={<CommunityHub />} />
         </Route>
 
         {/* Student Dashboard */}
@@ -136,6 +143,9 @@ function App() {
           <Route path="case-library/upload" element={<UploadCase />} />
           <Route path="case-library/:id" element={<CaseDetails />} />
           <Route path="case-builder" element={<AICaseBuilder />} />
+          <Route path="research" element={<ResearchHub />} />
+          <Route path="academy" element={<AcademyHub />} />
+          <Route path="community" element={<CommunityHub />} />
         </Route>
 
         {/* Civilian Dashboard */}
@@ -152,37 +162,30 @@ function App() {
           <Route path="dashboard" element={<DashboardHome />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="chat" element={<ChatPage />} />
-          <Route path="blog" element={<BlogPage />} />
-          <Route path="blog/:id" element={<BlogDetail />} />
-          <Route path="courtroom" element={<CourtroomPage />} />
           <Route path="ipc" element={<IPCPage />} />
-          <Route path="doc-analyzer" element={<DocumentAnalyzer />} />
-          <Route path="case-library" element={<CaseLibrary />} />
-          <Route path="case-library/upload" element={<UploadCase />} />
-          <Route path="case-library/:id" element={<CaseDetails />} />
-          <Route path="case-builder" element={<AICaseBuilder />} />
+          <Route path="research" element={<ResearchHub />} />
+          <Route path="community" element={<CommunityHub />} />
         </Route>
 
+        {/* Admin Dashboard */}
         <Route path="/admin" element={
           <ProtectedAdminRoute>
-            <SocketProvider>
-              <AdminLayout />
-            </SocketProvider>
+            <AdminLayout />
           </ProtectedAdminRoute>
         }>
-          <Route index element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route index element={<AdminDashboard />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="lawyers" element={<LawyerManagement />} />
           <Route path="blogs" element={<BlogManagement />} />
           <Route path="contacts" element={<ContactManagement />} />
           <Route path="cases" element={<CaseManagement />} />
           <Route path="ipc" element={<IPCManagement />} />
-          <Route path="moot-sessions" element={<MootManagement />} />
+          <Route path="moots" element={<MootManagement />} />
           <Route path="rooms" element={<RoomManagement />} />
-          <Route path="ai-monitoring" element={<AIMonitoring />} />
+          <Route path="ai-monitor" element={<AIMonitoring />} />
           <Route path="announcements" element={<AnnouncementManagement />} />
           <Route path="settings" element={<SettingsManagement />} />
+          <Route path="profile" element={<ProfilePage />} />
         </Route>
 
         {/* Fallback */}
@@ -190,6 +193,7 @@ function App() {
       </Routes>
       </SettingsProvider>
     </Router>
+    </AuthProvider>
   );
 }
 

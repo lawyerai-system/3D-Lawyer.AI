@@ -5,7 +5,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { 
     FaScaleUnbalanced, FaRobot, FaBook, FaGavel, FaPenNib, FaLightbulb, 
     FaUserGraduate, FaBrain, FaScaleBalanced, FaArrowRight, FaListCheck,
-    FaClock, FaChartLine, FaNewspaper, FaCirclePlay, FaFire
+    FaClock, FaChartLine, FaNewspaper, FaCirclePlay, FaFire, FaMagnifyingGlass,
+    FaFileLines, FaMicrochip, FaComments
 } from 'react-icons/fa6';
 import api from '../../utils/axios';
 import { toast } from 'react-hot-toast';
@@ -171,43 +172,64 @@ const QuickActionsGrid = styled.div`
 `;
 
 const ActionBtn = styled(Link)`
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  padding: 1.2rem;
-  border-radius: 16px;
-  text-decoration: none;
-  color: #fff;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 0.8rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-  &:hover {
-    background: rgba(108, 93, 211, 0.1);
-    border-color: var(--primary);
-    transform: translateY(-3px);
-    
-    .icon-wrap {
-      background: var(--primary);
-      color: #fff;
-    }
-  }
+  padding: 1.2rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  text-decoration: none;
+  color: white;
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
 
   .icon-wrap {
-    width: 40px;
-    height: 40px;
-    background: rgba(255, 255, 255, 0.05);
+    width: 45px;
+    height: 45px;
+    background: rgba(108, 93, 211, 0.1);
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 1.2rem;
     color: var(--primary);
     transition: all 0.3s;
   }
 
   span {
-    font-size: 0.9rem;
-    font-weight: 600;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  &:hover {
+    background: rgba(108, 93, 211, 0.15);
+    border-color: var(--primary);
+    transform: translateY(-5px);
+    .icon-wrap { 
+        background: var(--primary);
+        color: white;
+        transform: scale(1.1); 
+    }
+  }
+`;
+
+const SearchInput = styled.input`
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.7rem 1rem 0.7rem 2.5rem;
+  border-radius: 12px;
+  color: white;
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.3s;
+
+  &:focus {
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 0 3px rgba(108, 93, 211, 0.2);
   }
 `;
 
@@ -412,6 +434,19 @@ const DashboardHome = () => {
         ]
     };
 
+    const getRolePrefix = () => {
+        if (!user) return '/dashboard';
+        if (user.role === 'admin') return '/admin';
+        if (user.role === 'lawyer') return '/lawyer';
+        if (user.role === 'law_student') return '/student';
+        if (user.role === 'civilian') return '/civilian';
+        return '/dashboard';
+    };
+
+    const resolvePath = (path) => {
+        return `${getRolePrefix()}${path}`;
+    };
+
     const currentRecs = recommendations[user?.role] || recommendations.civilian;
 
     const newsItems = [
@@ -421,6 +456,30 @@ const DashboardHome = () => {
         "AI Regulation Bill proposed in upcoming parliament session",
         "Landmark judgment on Property Rights for Daughters summarized"
     ];
+
+    const [searchTerm, setSearchTerm] = React.useState('');
+
+    const allTools = [
+        { title: "Legal AI Chat", path: "/chat", icon: <FaRobot />, category: "research", roles: ["lawyer", "law_student", "civilian", "admin"], keywords: "ai chat legal help assistant" },
+        { title: "IPC Finder", path: "/ipc", icon: <FaBook />, category: "research", roles: ["lawyer", "law_student", "civilian", "admin"], keywords: "ipc law section indian penal code search" },
+        { title: "Doc Analyzer", path: "/doc-analyzer", icon: <FaFileLines />, category: "research", roles: ["lawyer", "law_student", "admin"], keywords: "document analysis contracts risk" },
+        { title: "Case Builder", path: "/case-builder", icon: <FaListCheck />, category: "practice", roles: ["lawyer", "law_student", "admin"], keywords: "case preparation evidence structure" },
+        { title: "Strategy Generator", path: "/strategy-generator", icon: <FaBrain />, category: "practice", roles: ["lawyer", "law_student", "admin"], keywords: "strategy legal advice arguments" },
+        { title: "Outcome Predictor", path: "/outcome-predictor", icon: <FaGavel />, category: "practice", roles: ["lawyer", "admin"], keywords: "predict success win rate analysis" },
+        { title: "Judicial Simulation", path: "/judicial-simulation", icon: <FaMicrochip />, category: "practice", roles: ["lawyer", "admin"], keywords: "judge simulation perspective court" },
+        { title: "Moot Court", path: "/moot-court", icon: <FaUserGraduate />, category: "academy", roles: ["law_student", "admin", "lawyer"], keywords: "trial practice advocacy student" },
+        { title: "Case Library", path: "/case-library", icon: <FaScaleBalanced />, category: "academy", roles: ["lawyer", "law_student", "admin"], keywords: "library precedents judgments research" },
+        { title: "Virtual Courtroom", path: "/courtroom", icon: <FaComments />, category: "community", roles: ["lawyer", "law_student", "civilian", "admin"], keywords: "courtroom discussion community collaborate" },
+        { title: "Legal Blog", path: "/blog", icon: <FaNewspaper />, category: "community", roles: ["lawyer", "law_student", "admin"], keywords: "blog news insights legal" },
+    ];
+
+    const filteredTools = allTools.filter(tool => {
+        const matchesRole = tool.roles.includes(user?.role);
+        const matchesSearch = tool.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                             tool.keywords.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                             tool.category.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesRole && matchesSearch;
+    });
 
     if (loading) {
         return (
@@ -450,11 +509,11 @@ const DashboardHome = () => {
             {/* Personalized Header */}
             <WelcomeHeader>
                 <div className="welcome-text">
-                    <h1>Welcome Back, {user?.name.split(' ')[0]}!</h1>
+                    <h1>Welcome Back, {(user?.name || 'User').split(' ')[0]}!</h1>
                     <p>Your legal command center is ready. Here's what's happening today.</p>
                 </div>
                 <div className="user-badge">
-                    <span className="role">{user?.role.replace('_', ' ')}</span>
+                    <span className="role">{(user?.role || 'user').replace('_', ' ')}</span>
                     <span className="last-login">
                         Last Active: {new Date(stats?.user?.lastLogin || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
@@ -463,26 +522,99 @@ const DashboardHome = () => {
 
             <DashboardGrid>
                 <MainContent>
-                    {/* Quick Actions */}
+                    {/* Smart Shortcuts with Search */}
                     <Widget>
-                        <WidgetTitle><FaCirclePlay /> Quick Actions</WidgetTitle>
-                        <QuickActionsGrid>
-                            <ActionBtn to="/dashboard/chat">
-                                <div className="icon-wrap"><FaRobot /></div>
-                                <span>Start Legal AI Chat</span>
-                            </ActionBtn>
-                            <ActionBtn to="/dashboard/ipc">
-                                <div className="icon-wrap"><FaBook /></div>
-                                <span>Search IPC Dictionary</span>
-                            </ActionBtn>
-                            <ActionBtn to="/dashboard/doc-analyzer">
-                                <div className="icon-wrap"><FaScaleUnbalanced /></div>
-                                <span>Analyze Document</span>
-                            </ActionBtn>
-                            <ActionBtn to="/dashboard/moot-court">
-                                <div className="icon-wrap"><FaUserGraduate /></div>
-                                <span>Moot Court Trial</span>
-                            </ActionBtn>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                            <WidgetTitle style={{ marginBottom: 0 }}><FaCirclePlay /> Smart Shortcuts</WidgetTitle>
+                            <div style={{ position: 'relative', flex: '1', maxWidth: '300px' }}>
+                                <FaMagnifyingGlass style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.4, fontSize: '0.9rem' }} />
+                                <SearchInput 
+                                    type="text" 
+                                    placeholder="Find a tool (e.g. 'strategy', 'ipc')..." 
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        <QuickActionsGrid style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
+                            {searchTerm ? (
+                                // Show Searched Tools
+                                filteredTools.length > 0 ? (
+                                    filteredTools.map((tool, i) => (
+                                        <ActionBtn key={i} to={resolvePath(tool.path)}>
+                                            <div className="icon-wrap">{tool.icon}</div>
+                                            <span>{tool.title}</span>
+                                        </ActionBtn>
+                                    ))
+                                ) : (
+                                    <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
+                                        No tools found matching "{searchTerm}"
+                                    </div>
+                                )
+                            ) : (
+                                // Show Default Top Shortcuts (Legacy logic)
+                                <>
+                                    {user?.role === 'lawyer' && (
+                                        <>
+                                            <ActionBtn to={resolvePath('/strategy-generator')}>
+                                                <div className="icon-wrap" style={{ background: 'var(--accent)' }}><FaBrain /></div>
+                                                <span>Build Case Strategy</span>
+                                            </ActionBtn>
+                                            <ActionBtn to={resolvePath('/outcome-predictor')}>
+                                                <div className="icon-wrap" style={{ background: 'var(--success)' }}><FaGavel /></div>
+                                                <span>Predict Outcome</span>
+                                            </ActionBtn>
+                                            <ActionBtn to={resolvePath('/case-builder')}>
+                                                <div className="icon-wrap"><FaListCheck /></div>
+                                                <span>Evidence Builder</span>
+                                            </ActionBtn>
+                                        </>
+                                    )}
+
+                                    {user?.role === 'law_student' && (
+                                        <>
+                                            <ActionBtn to={resolvePath('/moot-court')}>
+                                                <div className="icon-wrap" style={{ background: 'var(--accent)' }}><FaUserGraduate /></div>
+                                                <span>Launch Moot Trial</span>
+                                            </ActionBtn>
+                                            <ActionBtn to={resolvePath('/case-library')}>
+                                                <div className="icon-wrap" style={{ background: 'var(--info)' }}><FaScaleBalanced /></div>
+                                                <span>Legal Precedents</span>
+                                            </ActionBtn>
+                                            <ActionBtn to={resolvePath('/strategy-generator')}>
+                                                <div className="icon-wrap"><FaBrain /></div>
+                                                <span>Draft Strategy</span>
+                                            </ActionBtn>
+                                        </>
+                                    )}
+
+                                    {user?.role === 'civilian' && (
+                                        <>
+                                            <ActionBtn to={resolvePath('/chat')}>
+                                                <div className="icon-wrap" style={{ background: 'var(--accent)' }}><FaRobot /></div>
+                                                <span>Ask AI Lawyer</span>
+                                            </ActionBtn>
+                                            <ActionBtn to={resolvePath('/ipc')}>
+                                                <div className="icon-wrap" style={{ background: 'var(--info)' }}><FaBook /></div>
+                                                <span>Search IPC Laws</span>
+                                            </ActionBtn>
+                                            <ActionBtn to={resolvePath('/courtroom')}>
+                                                <div className="icon-wrap"><FaComments /></div>
+                                                <span>Join Courtroom</span>
+                                            </ActionBtn>
+                                        </>
+                                    )}
+
+                                    {/* Default AI Assistant for Pros */}
+                                    {user?.role !== 'civilian' && (
+                                        <ActionBtn to={resolvePath('/chat')}>
+                                            <div className="icon-wrap"><FaRobot /></div>
+                                            <span>AI Assistant</span>
+                                        </ActionBtn>
+                                    )}
+                                </>
+                            )}
                         </QuickActionsGrid>
                     </Widget>
 

@@ -192,7 +192,7 @@ const LandingFooter = () => {
 
         <FooterBottom>
           <p style={{ color: '#686a7d', fontSize: '0.85rem' }}>
-            © 2026 Lawyer.AI. Created with ❤️ for Justice.
+            © 2024 Lawyer.AI. Created with ❤️ for Justice.
           </p>
           <SocialLinks>
             <a href="https://github.com/Hetshah1203"><Github size={18} /></a>

@@ -489,76 +489,17 @@ const Navbar = () => {
         </LogoLink>
 
         <NavLinks>
-          {isFeatureEnabled('legalAI') && <StyledLink to={resolvePath('/chat')}>AI Chat <LiveBadge>AI</LiveBadge></StyledLink>}
+          <StyledLink to={resolvePath('/research')}>Research</StyledLink>
 
-          {/* Blogs: Restricted for Civilians */}
           {(user?.role === 'lawyer' || user?.role === 'law_student' || user?.role === 'admin') && (
-            <StyledLink to={resolvePath('/blog')}>Blog</StyledLink>
+            <StyledLink to={resolvePath('/practice')}>Practice</StyledLink>
           )}
 
-          {/* Courtroom: Accessible to Civilians and Lawyers */}
-          {(user?.role === 'civilian' || user?.role === 'lawyer' || user?.role === 'admin') && (
-            <StyledLink to={resolvePath('/courtroom')}>Courtroom</StyledLink>
+          {(user?.role === 'lawyer' || user?.role === 'law_student' || user?.role === 'admin') && (
+            <StyledLink to={resolvePath('/academy')}>Academy</StyledLink>
           )}
 
-          <StyledLink to={resolvePath('/case-library')}>Library</StyledLink>
-          <StyledLink to={resolvePath('/ipc')}>IPC</StyledLink>
-
-          <ToolsDropdownWrapper ref={toolsRef}>
-            <DropdownLabel $isOpen={isToolsOpen} onClick={() => setIsToolsOpen(!isToolsOpen)}>
-              Tools <FaChevronDown size={10} style={{ transform: isToolsOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.3s' }} />
-            </DropdownLabel>
-            <ToolsPanel $isOpen={isToolsOpen} className="tools-dropdown">
-              {isFeatureEnabled('docAnalyzer') && (
-                <ToolItemLink to={resolvePath('/doc-analyzer')} onClick={() => setIsToolsOpen(false)}>
-                  <div className="icon-wrap"><FaFileLines /></div>
-                  <div className="text-wrap"><span>Doc Analyzer</span><small>Extract clauses via AI</small></div>
-                </ToolItemLink>
-              )}
-              {isFeatureEnabled('caseBuilder') && (
-                <ToolItemLink to={resolvePath('/case-builder')} onClick={() => setIsToolsOpen(false)}>
-                  <div className="icon-wrap"><FaListCheck /></div>
-                  <div className="text-wrap"><span>Case Builder</span><small>Structured legal analysis</small></div>
-                </ToolItemLink>
-              )}
-
-              {/* Strategy & Moot: Students & Lawyers */}
-              {(user?.role === 'law_student' || user?.role === 'lawyer' || user?.role === 'admin') && (
-                <>
-                  {isFeatureEnabled('strategyGenerator') && (
-                    <ToolItemLink to={resolvePath('/strategy-generator')} onClick={() => setIsToolsOpen(false)}>
-                      <div className="icon-wrap"><FaBrain /></div>
-                      <div className="text-wrap"><span>Strategy Gen</span><small>Tactical case advice</small></div>
-                    </ToolItemLink>
-                  )}
-                  {isFeatureEnabled('mootCourt') && (
-                    <ToolItemLink to={resolvePath('/moot-court')} onClick={() => setIsToolsOpen(false)}>
-                      <div className="icon-wrap"><FaScaleBalanced /></div>
-                      <div className="text-wrap"><span>Moot Court</span><small>Virtual trial practice</small></div>
-                    </ToolItemLink>
-                  )}
-                </>
-              )}
-
-              {/* Predictor & Simulation: Lawyers Only */}
-              {(user?.role === 'lawyer' || user?.role === 'admin') && (
-                <>
-                  {isFeatureEnabled('outcomePredictor') && (
-                    <ToolItemLink to={resolvePath('/outcome-predictor')} onClick={() => setIsToolsOpen(false)}>
-                      <div className="icon-wrap"><FaGavel /></div>
-                      <div className="text-wrap"><span>Predictor</span><small>Success probability</small></div>
-                    </ToolItemLink>
-                  )}
-                  {isFeatureEnabled('judicialSimulation') && (
-                    <ToolItemLink to={resolvePath('/judicial-simulation')} onClick={() => setIsToolsOpen(false)}>
-                      <div className="icon-wrap"><FaMicrochip /></div>
-                      <div className="text-wrap"><span>Simulation</span><small>Judge's perspective</small></div>
-                    </ToolItemLink>
-                  )}
-                </>
-              )}
-            </ToolsPanel>
-          </ToolsDropdownWrapper>
+          <StyledLink to={resolvePath('/community')}>Community</StyledLink>
         </NavLinks>
 
         <div style={{ position: 'relative' }}>
@@ -569,8 +510,8 @@ const Navbar = () => {
             </UserInfo>
             <ProfileImage>
               <UserAvatar 
-                src={user.profilePicture || user.profileImage} 
-                name={user.name} 
+                src={user?.profilePicture || user?.profileImage} 
+                name={user?.name || 'User'} 
                 size="34px" 
               />
             </ProfileImage>
@@ -605,53 +546,25 @@ const Navbar = () => {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.8rem' }}>
-          {/* Dashboard Link Added for Mobile Accessibility */}
-          <StyledLink to={getDashboardPath()} onClick={() => setIsMobileOpen(false)} style={{ color: 'var(--primary)', borderBottom: '1px solid rgba(108,93,211,0.2)', paddingBottom: '1rem' }}>
-            Dashboard Overview
-          </StyledLink>
-          <StyledLink to={resolvePath('/chat')} onClick={() => setIsMobileOpen(false)}>AI Chat</StyledLink>
-          
-          {/* Blogs: Restricted for Civilians */}
-          {(user?.role === 'lawyer' || user?.role === 'law_student' || user?.role === 'admin') && (
-            <StyledLink to={resolvePath('/blog')} onClick={() => setIsMobileOpen(false)}>Blog</StyledLink>
-          )}
-          
-          {/* Courtroom: Restricted for Law Students */}
-          {(user?.role === 'civilian' || user?.role === 'lawyer' || user?.role === 'admin') && (
-            <StyledLink to={resolvePath('/courtroom')} onClick={() => setIsMobileOpen(false)}>Courtroom</StyledLink>
-          )}
-          <StyledLink to={resolvePath('/case-library')} onClick={() => setIsMobileOpen(false)}>Library</StyledLink>
-          <StyledLink to={resolvePath('/ipc')} onClick={() => setIsMobileOpen(false)}>IPC Finder</StyledLink>
+          <StyledLink to={resolvePath('/research')} onClick={() => setIsMobileOpen(false)}>Research Hub</StyledLink>
 
-          <div style={{ margin: '1rem 0', padding: '1.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: '800', marginBottom: '1.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Legal Tools</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <StyledLink to={resolvePath('/doc-analyzer')} onClick={() => setIsMobileOpen(false)}>Analyze Doc</StyledLink>
-              <StyledLink to={resolvePath('/case-builder')} onClick={() => setIsMobileOpen(false)}>Case Builder</StyledLink>
-              {/* Strategy & Moot: Students & Lawyers */}
-              {(user?.role === 'law_student' || user?.role === 'lawyer' || user?.role === 'admin') && (
-                <>
-                  <StyledLink to={resolvePath('/strategy-generator')} onClick={() => setIsMobileOpen(false)}>Strategy Gen</StyledLink>
-                  <StyledLink to={resolvePath('/moot-court')} onClick={() => setIsMobileOpen(false)}>Moot Court</StyledLink>
-                </>
-              )}
-              {/* Predictor & Simulation: Lawyers Only */}
-              {(user?.role === 'lawyer' || user?.role === 'admin') && (
-                <>
-                  <StyledLink to={resolvePath('/outcome-predictor')} onClick={() => setIsMobileOpen(false)}>Predictor</StyledLink>
-                  <StyledLink to={resolvePath('/judicial-simulation')} onClick={() => setIsMobileOpen(false)}>Simulations</StyledLink>
-                </>
-              )}
-            </div>
-          </div>
+          {(user?.role === 'lawyer' || user?.role === 'law_student' || user?.role === 'admin') && (
+            <StyledLink to={resolvePath('/practice')} onClick={() => setIsMobileOpen(false)}>Practice Jam</StyledLink>
+          )}
+
+          {(user?.role === 'lawyer' || user?.role === 'law_student' || user?.role === 'admin') && (
+            <StyledLink to={resolvePath('/academy')} onClick={() => setIsMobileOpen(false)}>Academy</StyledLink>
+          )}
+
+          <StyledLink to={resolvePath('/community')} onClick={() => setIsMobileOpen(false)}>Community</StyledLink>
         </div>
 
         <div style={{ marginTop: 'auto', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '2rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
             <ProfileImage style={{ width: '45px', height: '45px' }}>
               <UserAvatar 
-                src={user.profilePicture || user.profileImage} 
-                name={user.name} 
+                src={user?.profilePicture || user?.profileImage} 
+                name={user?.name || 'User'} 
                 size="45px" 
               />
             </ProfileImage>

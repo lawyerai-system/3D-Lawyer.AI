@@ -14,8 +14,14 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
         if (token && storedUser) {
-            setUser(JSON.parse(storedUser));
-            // axios defaults handled in utils/axios.js interceptor, but we can set state if needed
+            try {
+                setUser(JSON.parse(storedUser));
+            } catch (err) {
+                console.error("Failed to parse stored user", err);
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+                setToken(null);
+            }
         }
         setLoading(false);
     }, [token]);
